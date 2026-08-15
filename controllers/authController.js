@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const { sendWelcomeEmail } = require("../services/emailService");
 
 const generateToken = (userId) => {
     return jwt.sign(
@@ -16,54 +17,55 @@ const generateToken = (userId) => {
 // =====================================
 
 const register = async (req, res, next) => {
-    try {
-        const { name, email, password } = req.body;
+  try {
+    const { name, email, phone, password, role } = req.body;
 
-        if (!name || !email || !password) {
-            return res.status(400).json({
-                success: false,
-                message: "Name, email and password are required",
-            });
-        }
-
-        const normalizedEmail = email.toLowerCase().trim();
-
-        const existingUser = await User.findOne({
-            email: normalizedEmail,
-        });
-
-        if (existingUser) {
-            return res.status(409).json({
-                success: false,
-                message: "User with this email already exists",
-            });
-        }
-
-        const user = await User.create({
-            name: name.trim(),
-            email: normalizedEmail,
-            password,
-
-            // NEVER accept role from public registration
-            role: "staff",
-        });
-
-        const token = generateToken(user._id.toString());
-
-        res.status(201).json({
-            success: true,
-            message: "User registered successfully",
-            token,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-            },
-        });
-    } catch (error) {
-        next(error);
+    if (!name || !email || !phone || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, phone and password are required",
+      });
     }
+
+    const existingUser = await User.findOne({
+      $or: [
+        { email: email.toLowerCase() },
+        { phone },
+      ],
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "User with this email or phone already exists",
+      });
+    }
+
+    const user = await User.create({
+      name,
+      email: email.toLowerCase(),
+      phone,
+      password,
+      role: role || "staff",
+    });
+
+    const token = generateToken(user._id);
+
+    res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 // =====================================

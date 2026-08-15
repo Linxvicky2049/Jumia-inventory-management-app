@@ -4,6 +4,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const mongoose = require("mongoose");
 
 dotenv.config();
 
@@ -97,6 +98,10 @@ const startServer = async () => {
 
 if (require.main === module) {
     startServer();
+} else if (mongoose.connection.readyState === 0) {
+    connectDB().catch((error) => {
+        console.error("Database connection failed during app import:", error.message);
+    });
 }
 
 module.exports = app;

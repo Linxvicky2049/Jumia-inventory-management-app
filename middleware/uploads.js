@@ -1,15 +1,7 @@
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../config/cloudinaryConfig");
 
-const storage = new CloudinaryStorage({
-    cloudinary,
-    params: {
-        folder: "jumia-inventory",
-        allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
-        transformation: [{ width: 1200, height: 1200, crop: "limit" }],
-    },
-});
+const storage = multer.memoryStorage();
 
 const upload = multer({
     storage,
@@ -24,4 +16,33 @@ const upload = multer({
     },
 });
 
-module.exports = upload;
+const uploadToCloudinary = async (file) => {
+    if (!file || !file.buffer) {
+        throw new Error("No file buffer provided");
+    }
+
+    const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            {
+                folder: "jumia-inventory",
+                transformation: [{ width: 1200, height: 1200, crop: "limit" }],
+            },
+            (error, uploaded) => {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(uploaded);
+            }
+        );
+
+        stream.end(file.buffer);
+    });
+
+    return result.secure_url;
+};
+
+module.exports = {
+    upload,
+    uploadToCloudinary,
+};

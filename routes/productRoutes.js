@@ -16,28 +16,31 @@ const {
   protect,
   authorize,
 } = require("../middleware/auth");
+const {
+  productValidation,
+  productUpdateValidation,
+} = require("../middleware/validators/productValidator");
 
 const router = express.Router();
 
 router.use(protect);
 
 router.get("/", getProducts);
-
 router.get("/low-stock", getLowStock);
-
 router.get("/:id/movements", getStockMovements);
-
 router.get("/:id", getProduct);
 
 router.post(
   "/",
   authorize("admin", "manager"),
+  productValidation,
   createProduct
 );
 
 router.put(
   "/:id",
   authorize("admin", "manager"),
+  productUpdateValidation,
   updateProduct
 );
 

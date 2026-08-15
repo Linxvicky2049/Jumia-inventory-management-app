@@ -2,10 +2,13 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const morgan = require("morgan");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 
 dotenv.config();
 
 const connectDB = require("./config/databaseConfig");
+const { notFound, errorHandler } = require("./middleware/errorHandler");
 
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
@@ -15,14 +18,27 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: "Too many requests from this IP, please try again later.",
+    },
+});
+
 // ===============================
 // Middleware
 // ===============================
 
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+app.use("/api", apiLimiter);
 
 // ===============================
 // Health Check
@@ -54,30 +70,11 @@ app.use("/api/suppliers", supplierRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
 // ===============================
-// 404 Handler
+// Error Handling
 // ===============================
 
-app.use((req, res) => {
-    res.status(404).json({
-        success: false,
-        message: `Route not found: ${req.method} ${req.originalUrl}`,
-    });
-});
-
-// ===============================
-// Global Error Handler
-// ===============================
-
-app.use((err, req, res, next) => {
-    console.error("ERROR:", err);
-
-    const statusCode = err.status || 500;
-
-    res.status(statusCode).json({
-        success: false,
-        message: err.message || "Internal server error",
-    });
-});
+app.use(notFound);
+app.use(errorHandler);
 
 // ===============================
 // Start Server
@@ -98,4 +95,8 @@ const startServer = async () => {
     }
 };
 
-startServer();
+if (require.main === module) {
+    startServer();
+}
+
+module.exports = app;

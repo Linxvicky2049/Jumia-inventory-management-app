@@ -1,9 +1,16 @@
 const Product = require("../models/Product");
 const StockMovement = require("../models/StockMovement");
+const { generateSKU } = require("../utilities/generateSKU");
+const { stockIn, stockOut } = require("../services/inventoryService");
 
 const createProduct = async (req, res, next) => {
   try {
-    const product = await Product.create(req.body);
+    const productData = {
+      ...req.body,
+      sku: req.body.sku || generateSKU(req.body.name, req.body.category),
+    };
+
+    const product = await Product.create(productData);
 
     res.status(201).json({
       success: true,
@@ -17,14 +24,7 @@ const createProduct = async (req, res, next) => {
 
 const getProducts = async (req, res, next) => {
   try {
-    const {
-      search,
-      category,
-      status,
-      lowStock,
-      page = 1,
-      limit = 20,
-    } = req.query;
+    const { search, category, status, lowStock, page = 1, limit = 20 } = req.query;
 
     const filter = {};
 
@@ -59,7 +59,6 @@ const getProducts = async (req, res, next) => {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(Number(limit)),
-
       Product.countDocuments(filter),
     ]);
 
@@ -100,14 +99,10 @@ const getProduct = async (req, res, next) => {
 
 const updateProduct = async (req, res, next) => {
   try {
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!product) {
       return res.status(404).json({
@@ -146,38 +141,13 @@ const deleteProduct = async (req, res, next) => {
   }
 };
 
-const stockIn = async (req, res, next) => {
+const stockInController = async (req, res, next) => {
   try {
     const { quantity, reason } = req.body;
 
-    if (!quantity || quantity <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Quantity must be greater than zero",
-      });
-    }
-
-    const product = await Product.findById(req.params.id);
-
-    if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
-    }
-
-    const previousQuantity = product.quantity;
-
-    product.quantity += Number(quantity);
-
-    await product.save();
-
-    const movement = await StockMovement.create({
-      product: product._id,
-      type: "stock-in",
+    const result = await stockIn({
+      productId: req.params.id,
       quantity,
-      previousQuantity,
-      newQuantity: product.quantity,
       reason,
       performedBy: req.user._id,
     });
@@ -185,54 +155,21 @@ const stockIn = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Stock added successfully",
-      product,
-      movement,
+      product: result.product,
+      movement: result.movement,
     });
   } catch (error) {
     next(error);
   }
 };
 
-const stockOut = async (req, res, next) => {
+const stockOutController = async (req, res, next) => {
   try {
     const { quantity, reason } = req.body;
 
-    if (!quantity || quantity <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Quantity must be greater than zero",
-      });
-    }
-
-    const product = await Product.findById(req.params.id);
-
-    if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
-    }
-
-    if (product.quantity < Number(quantity)) {
-      return res.status(400).json({
-        success: false,
-        message: "Insufficient stock",
-        availableStock: product.quantity,
-      });
-    }
-
-    const previousQuantity = product.quantity;
-
-    product.quantity -= Number(quantity);
-
-    await product.save();
-
-    const movement = await StockMovement.create({
-      product: product._id,
-      type: "stock-out",
+    const result = await stockOut({
+      productId: req.params.id,
       quantity,
-      previousQuantity,
-      newQuantity: product.quantity,
       reason,
       performedBy: req.user._id,
     });
@@ -240,8 +177,8 @@ const stockOut = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Stock removed successfully",
-      product,
-      movement,
+      product: result.product,
+      movement: result.movement,
     });
   } catch (error) {
     next(error);
@@ -250,9 +187,7 @@ const stockOut = async (req, res, next) => {
 
 const getStockMovements = async (req, res, next) => {
   try {
-    const movements = await StockMovement.find({
-      product: req.params.id,
-    })
+    const movements = await StockMovement.find({ product: req.params.id })
       .populate("performedBy", "name email role")
       .sort({ createdAt: -1 });
 
@@ -269,9 +204,7 @@ const getStockMovements = async (req, res, next) => {
 const getLowStock = async (req, res, next) => {
   try {
     const products = await Product.find({
-      $expr: {
-        $lte: ["$quantity", "$minimumStock"],
-      },
+      $expr: { $lte: ["$quantity", "$minimumStock"] },
       status: "active",
     })
       .populate("category", "name")
@@ -294,8 +227,8 @@ module.exports = {
   getProduct,
   updateProduct,
   deleteProduct,
-  stockIn,
-  stockOut,
+  stockIn: stockInController,
+  stockOut: stockOutController,
   getStockMovements,
   getLowStock,
 };

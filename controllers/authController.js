@@ -15,57 +15,83 @@ const generateToken = (userId) => {
 // =====================================
 // REGISTER
 // =====================================
-
 const register = async (req, res, next) => {
-  try {
-    const { name, email, phone, password, role } = req.body;
+    try {
+        const { name, email, phone, password, role } = req.body;
 
-    if (!name || !email || !phone || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Name, email, phone and password are required",
-      });
+        if (!name || !email || !phone || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Name, email, phone and password are required",
+            });
+        }
+
+        const existingUser = await User.findOne({
+            $or: [
+                { email: email.toLowerCase().trim() },
+                { phone: phone.trim() },
+            ],
+        });
+
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                message: "User with this email or phone already exists",
+            });
+        }
+
+        const user = await User.create({
+            name: name.trim(),
+            email: email.toLowerCase().trim(),
+            phone: phone.trim(),
+            password,
+            role: role || "staff",
+        });
+
+        const token = generateToken(user._id.toString());
+
+        // =====================================
+        // SEND WELCOME EMAIL
+        // =====================================
+
+        let emailSent = false;
+
+        try {
+            await sendWelcomeEmail({
+                name: user.name,
+                email: user.email,
+            });
+
+            emailSent = true;
+
+            console.log(`Welcome email sent to ${user.email}`);
+        } catch (emailError) {
+            console.error(
+                `Welcome email failed for ${user.email}:`,
+                emailError.message
+            );
+        }
+
+        // =====================================
+        // RESPONSE
+        // =====================================
+
+        res.status(201).json({
+            success: true,
+            message: "User registered successfully",
+            emailSent,
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                role: user.role,
+            },
+        });
+    } catch (error) {
+        next(error);
     }
-
-    const existingUser = await User.findOne({
-      $or: [
-        { email: email.toLowerCase() },
-        { phone },
-      ],
-    });
-
-    if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        message: "User with this email or phone already exists",
-      });
-    }
-
-    const user = await User.create({
-      name,
-      email: email.toLowerCase(),
-      phone,
-      password,
-      role: role || "staff",
-    });
-
-    const token = generateToken(user._id);
-
-    res.status(201).json({
-      success: true,
-      message: "User registered successfully",
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
 };
 
 // =====================================

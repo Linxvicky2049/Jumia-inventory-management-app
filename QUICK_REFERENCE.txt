@@ -1,0 +1,108 @@
+╔════════════════════════════════════════════════════════════════╗
+║                    QUICK REFERENCE CARD                        ║
+║          BLACKSUN Email Support Feature Setup                  ║
+╚════════════════════════════════════════════════════════════════╝
+
+📋 PAYMENT DETAILS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  OPay:           8122911210
+  MiniPay:        +2348122911210
+  Min Donation:   ₦100
+  Sender Email:   BLACKSUN - inventory-management email services
+
+🎯 ONE-TIME SETUP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. Extract QR code from screenshot
+  2. Save to: public/images/minipay-qr.png
+  3. Restart application
+  4. Test with new user registration
+
+💻 HELPER COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  # Save QR code image
+  node save-qrcode.js ./your-qr-image.png
+
+  # Run setup wizard
+  node setup-email-support.js
+
+  # Verify syntax
+  node -c services/emailService.js
+
+📁 KEY FILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  config/emailConfig.js            → Sender configuration
+  services/emailService.js         → Email templates
+  utilities/qrcodeGenerator.js     → QR code handler
+  public/images/minipay-qr.png     → Save QR code here
+  
+  EMAIL_SUPPORT_FEATURE.md         → Full documentation
+  IMPLEMENTATION_SUMMARY.md        → Changes summary
+
+📧 WHAT USERS SEE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  From: BLACKSUN - inventory-management email services
+  
+  Email Content:
+  ✓ Welcome message
+  ✓ Account details
+  ✓ Available features
+  ✓ Support section with:
+    - Donation message
+    - OPay & MiniPay numbers
+    - QR code image
+  ✓ Security notice
+  ✓ Footer with sender info
+
+🔍 VERIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Check email for:
+  □ Correct sender name (BLACKSUN - ...)
+  □ Support section visible
+  □ Payment options displayed
+  □ QR code image showing (if saved)
+  □ All text properly formatted
+
+⚙️  CUSTOMIZATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Payment Details:
+  → Edit utilities/qrcodeGenerator.js
+
+  Sender Name:
+  → Add EMAIL_FROM_NAME=... to .env
+
+  Email Template:
+  → Edit services/emailService.js (lines 580-630)
+
+🐛 TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  QR code not showing?
+  → Save image to: public/images/minipay-qr.png
+  → Restart application
+  → Check email client (some block images)
+
+  Email not sending?
+  → Check SMTP credentials in .env
+  → Review email service logs
+  → Test with: test-email.js
+
+  Wrong sender name?
+  → Update .env or emailConfig.js default
+  → Restart application
+
+✅ STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✓ Code implementation: COMPLETE
+  ⏳ QR code image: PENDING (save to public/images/)
+  ⏳ Application restart: PENDING
+  ⏳ Testing: PENDING (register new user)
+
+📞 NEED HELP?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1. Run: node setup-email-support.js
+  2. Read: EMAIL_SUPPORT_FEATURE.md
+  3. Check: IMPLEMENTATION_SUMMARY.md
+
+═══════════════════════════════════════════════════════════════════
+
+Last updated: 2026-08-16
+Version: 1.0

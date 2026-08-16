@@ -46,7 +46,7 @@ const sendEmail = async ({
     try {
         const fromName =
             process.env.EMAIL_FROM_NAME ||
-            "Jumia Inventory Management";
+            "BLACKSUN - inventory-management email services";
 
         const fromEmail =
             process.env.EMAIL_FROM ||

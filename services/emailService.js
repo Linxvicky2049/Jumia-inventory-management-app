@@ -1,4 +1,5 @@
 const { transporter } = require("../config/emailConfig");
+const { getQRCodeDataURL, getPaymentInfo } = require("../utilities/qrcodeGenerator");
 
 /**
  * Generic email sender
@@ -25,6 +26,9 @@ const sendWelcomeEmail = async ({
     supportInfo = "Please contact the system administrator for support.",
     qrUrl,
 }) => {
+    // Get QR code from utility if not provided
+    const finalQrUrl = qrUrl || getQRCodeDataURL();
+    
     let roleMessage = "";
     let roleFeatures = "";
 
@@ -189,10 +193,17 @@ ${roleMessage}
 You can access the inventory dashboard at:
 http://localhost:3000/login
 
+--- SUPPORT OUR DEVELOPMENT ---
+If you find this system helpful, please support us with any amount from ₦100:
+- OPay: 8122911210
+- MiniPay: +2348122911210
+
 If you did not create this account, please contact our support team immediately.
 
 Jumia Inventory Management
 Inventory control made simpler.
+
+Powered by BLACKSUN - inventory-management email services
         `.trim(),
 
         html: `
@@ -617,6 +628,42 @@ Inventory control made simpler.
             </div>
 
 
+            <!-- SUPPORT US SECTION -->
+
+            <div class="card" style="background: linear-gradient(135deg, #ffeaa7, #fdcb6e); border: 2px solid #fab1a0;">
+
+                <h3 style="margin-top: 0; color: #2d3436; text-align: center;">
+                    💚 Support Our Development
+                </h3>
+
+                <p style="text-align: center; color: #2d3436; margin: 10px 0;">
+                    If you find this inventory management system helpful, please consider supporting us with any amount starting from <strong>₦100</strong>.
+                </p>
+
+                <div style="display: flex; justify-content: space-around; align-items: center; margin: 20px 0; flex-wrap: wrap;">
+
+                    <div style="text-align: center; padding: 10px;">
+                        <h4 style="color: #2d3436; margin: 0 0 8px 0; font-size: 14px;">OPay</h4>
+                        <p style="margin: 5px 0; color: #555; font-size: 13px;"><strong>8122911210</strong></p>
+                    </div>
+
+                    <div style="text-align: center; padding: 10px;">
+                        <h4 style="color: #2d3436; margin: 0 0 8px 0; font-size: 14px;">MiniPay</h4>
+                        <p style="margin: 5px 0; color: #555; font-size: 13px;"><strong>+2348122911210</strong></p>
+                    </div>
+
+                </div>
+
+                <div style="text-align: center; margin-top: 15px;">
+                    ${finalQrUrl ? `<img src="${finalQrUrl}" alt="MiniPay QR Code" style="width: 150px; height: 150px; border: 2px solid #fff; border-radius: 8px; display: inline-block;">` : '<p style="color: #555; font-size: 12px;">Scan with MiniPay to support us</p>'}
+                </div>
+
+                <p style="text-align: center; font-size: 12px; color: #555; margin-top: 10px;">
+                    Every bit helps us improve and maintain this system for you!
+                </p>
+
+            </div>
+
             <!-- SECURITY NOTE -->
 
             <div class="note">
@@ -653,6 +700,10 @@ Inventory control made simpler.
 
                     <br>
 
+                    Powered by <strong>BLACKSUN - inventory-management email services</strong>
+
+                    <br>
+
                     ${
                         linkedin && linkedin !== "#"
                             ? `
@@ -667,26 +718,6 @@ Inventory control made simpler.
                     ${supportInfo}
 
                 </p>
-
-
-                ${
-                    qrUrl
-                        ? `
-                            <div class="qr-container">
-
-                                <img
-                                    src="${qrUrl}"
-                                    alt="MiniPay QR Code"
-                                >
-
-                                <p>
-                                    Scan to support via MiniPay
-                                </p>
-
-                            </div>
-                        `
-                        : ""
-                }
 
             </div>
 
@@ -708,4 +739,6 @@ Inventory control made simpler.
 module.exports = {
     sendEmail,
     sendWelcomeEmail,
+    getQRCodeDataURL,
+    getPaymentInfo,
 };

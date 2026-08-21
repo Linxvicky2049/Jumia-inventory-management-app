@@ -19,24 +19,24 @@ const router = express.Router();
 
 router.use(protect);
 
-router.get("/", getCategories);
+router.get("/categories", getCategories);
 
 router.post(
-  "/",
+  "/categories",
   authorize("admin", "manager"),
   categoryValidation,
   createCategory
 );
 
 router.put(
-  "/:id",
+  "/categories/:id",
   authorize("admin", "manager"),
   categoryValidation,
   updateCategory
 );
 
 router.delete(
-  "/:id",
+  "/categories/:id",
   authorize("admin"),
   deleteCategory
 );

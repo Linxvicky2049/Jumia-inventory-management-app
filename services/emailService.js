@@ -27,7 +27,10 @@ const sendWelcomeEmail = async ({
     qrUrl,
 }) => {
     // Get QR code from utility if not provided
-    const finalQrUrl = qrUrl || getQRCodeDataURL();
+    const finalQrUrl =
+  qrUrl ||
+  (await getQRCodeDataURL(getPaymentInfo())) ||
+  "/images/minipay-qr.png";
     
     let roleMessage = "";
     let roleFeatures = "";

@@ -12,7 +12,7 @@ const {
 const router = express.Router();
 
 router.get(
-  "/",
+  "/dashboard",
   protect,
   authorize("admin", "manager"),
   getDashboard

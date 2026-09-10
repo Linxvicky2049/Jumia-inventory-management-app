@@ -12,10 +12,11 @@ const connectDB = require("./config/databaseConfig");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
 
 const authRoutes = require("./routes/authRoutes");
-const productRoutes = require("./routes/productRoutes");
+const productRoutes = require("./routes/productroutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const supplierRoutes = require("./routes/supplierRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+
 
 const app = express();
 

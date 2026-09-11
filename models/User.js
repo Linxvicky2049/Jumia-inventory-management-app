@@ -52,6 +52,33 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    engagement: {
+      tokens: { type: Number, default: 0, min: 0 },
+      points: { type: Number, default: 0, min: 0 },
+      level: { type: Number, default: 1, min: 1 },
+      xp: { type: Number, default: 0, min: 0 },
+      trophies: [
+        {
+          tier: {
+            type: String,
+            enum: ["wood", "copper", "bronze", "silver", "gold", "platinum", "diamond"],
+          },
+          name: String,
+          earnedAt: { type: Date, default: Date.now },
+        },
+      ],
+      ownedItems: [
+        {
+          itemId: String,
+          purchasedAt: { type: Date, default: Date.now },
+          applied: { type: Boolean, default: false },
+        },
+      ],
+      completedMissions: [
+        { missionId: String, completedAt: { type: Date, default: Date.now } },
+      ],
+    },
   },
   {
     timestamps: true,

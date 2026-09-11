@@ -130,11 +130,9 @@ router.get(
 // POST /api/products
 router.post(
   "/",
-
   authorize("admin", "manager"),
-
+  upload.single("image"),
   productValidation,
-
   createProduct
 );
 

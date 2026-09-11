@@ -8,6 +8,7 @@ import {
   ArrowUpFromLine,
   Settings,
   LogOut,
+  Radio,
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
@@ -47,6 +48,11 @@ const navigation = [
     label: "Users",
     path: "/users",
     icon: Users,
+  },
+  {
+    label: "Live Studio",
+    path: "/live-studio",
+    icon: Radio,
   },
 ];
 

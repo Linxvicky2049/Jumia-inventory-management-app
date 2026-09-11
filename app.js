@@ -16,6 +16,7 @@ const productRoutes = require("./routes/productroutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const supplierRoutes = require("./routes/supplierRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const engagementRoutes = require("./routes/engagementRoutes");
 
 
 const app = express();
@@ -70,6 +71,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/suppliers", supplierRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/engagement", engagementRoutes);
 
 // ===============================
 // Error Handling

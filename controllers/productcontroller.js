@@ -25,6 +25,12 @@ const createProduct = async (req, res, next) => {
         generateSKU(req.body.name, req.body.category),
     };
 
+    // Upload image if one was provided
+    if (req.file) {
+      const imageUrl = await uploadToCloudinary(req.file);
+      productData.image = imageUrl;
+    }
+
     const product = await Product.create(productData);
 
     const populatedProduct = await Product.findById(product._id)
